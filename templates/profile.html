@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="profile">
+    <h2>Meus Dados</h2>
+    <p><strong>Username:</strong> {{ user.username }}</p>
+    <p><strong>Email:</strong> {{ user.email }}</p>
+    <p><strong>Admin:</strong> {{ 'Yes' if user.is_admin else 'No' }}</p>
+    <p><strong>Registered on:</strong> {{ user.created_at.strftime('%Y-%m-%d %H:%M') }}</p>
+
+    <h3>Change Password</h3>
+    <form method="POST">
+        {{ form.hidden_tag() }}
+        <div class="form-group">
+            {{ form.current_password.label }}
+            {{ form.current_password(class="form-control") }}
+        </div>
+        <div class="form-group">
+            {{ form.new_password.label }}
+            {{ form.new_password(class="form-control") }}
+        </div>
+        <div class="form-group">
+            {{ form.confirm_password.label }}
+            {{ form.confirm_password(class="form-control") }}
+        </div>
+        <div class="form-group">
+            {{ form.submit(class="btn") }}
+        </div>
+    </form>
+</div>
+{% endblock %}

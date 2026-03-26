@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="landing">
+    <h1>Bem‑vindo ao Sistema de Gestão de Usuários</h1>
+    <div class="buttons">
+        <a href="{{ url_for('login') }}" class="btn">Login</a>
+        <a href="{{ url_for('register') }}" class="btn">Cadastro</a>
+        <a href="{{ url_for('forgot_password') }}" class="btn">Esqueci minha senha</a>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,138 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="user-list">
+    <h2>Listar Usuários</h2>
+    <form method="GET" action="{{ url_for('user_list') }}" class="search-form">
+        <input type="text" name="search" placeholder="Buscar por nome ou email" value="{{ search or '' }}">
+        <button type="submit" class="btn">Buscar</button>
+    </form>
+
+    <div class="table-responsive">
+        <table>
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Username</th>
+                    <th>Email</th>
+                    <th>Admin</th>
+                    <th>Ações</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for user in users %}
+                <tr>
+                    <td data-label="ID">{{ user.id }}</td>
+                    <td data-label="Username">{{ user.username }}</td>
+                    <td data-label="Email">{{ user.email }}</td>
+                    <td data-label="Admin">{{ 'Sim' if user.is_admin else 'Não' }}</td>
+                    <td data-label="Ações">
+                        {% if user.id != current_user.id %}
+                        <button class="btn danger delete-user-btn" data-user-id="{{ user.id }}" data-username="{{ user.username }}">Excluir</button>
+                        <button class="btn change-password-btn" data-user-id="{{ user.id }}">Alterar Senha</button>
+                        {% else %}
+                        —
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <div class="pagination">
+        {% if pagination.has_prev %}
+            <a href="{{ url_for('user_list', page=pagination.prev_num, search=search) }}">Anterior</a>
+        {% endif %}
+        <span>Página {{ pagination.page }} de {{ pagination.pages }}</span>
+        {% if pagination.has_next %}
+            <a href="{{ url_for('user_list', page=pagination.next_num, search=search) }}">Próxima</a>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Modal de confirmação para exclusão -->
+<div id="deleteModal" class="modal">
+    <div class="modal-content">
+        <span class="close">&times;</span>
+        <h3>Confirmar exclusão</h3>
+        <p>Tem certeza que deseja excluir o usuário <strong id="deleteUsername"></strong>?</p>
+        <form id="deleteForm" method="POST" style="display: inline;">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <button type="submit" class="btn danger">Excluir</button>
+            <button type="button" class="btn cancel-btn">Cancelar</button>
+        </form>
+    </div>
+</div>
+
+<!-- Modal para alterar senha -->
+<div id="changePasswordModal" class="modal">
+    <div class="modal-content">
+        <span class="close">&times;</span>
+        <h3>Alterar Senha</h3>
+        <form id="changePasswordForm" method="POST">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <div class="form-group">
+                <label for="new_password">Nova Senha</label>
+                <input type="password" name="new_password" id="new_password" required minlength="6">
+            </div>
+            <div class="form-group">
+                <label for="confirm_password">Confirmar Senha</label>
+                <input type="password" name="confirm_password" id="confirm_password" required>
+            </div>
+            <button type="submit" class="btn">Alterar Senha</button>
+            <button type="button" class="btn cancel-btn">Cancelar</button>
+        </form>
+    </div>
+</div>
+
+<script>
+    // Modal de exclusão
+    var deleteModal = document.getElementById('deleteModal');
+    var deleteForm = document.getElementById('deleteForm');
+    var deleteUsernameSpan = document.getElementById('deleteUsername');
+    var deleteButtons = document.querySelectorAll('.delete-user-btn');
+
+    // Modal de alteração de senha
+    var passwordModal = document.getElementById('changePasswordModal');
+    var passwordForm = document.getElementById('changePasswordForm');
+
+    // Fechar modais (botão x e clique fora)
+    function closeModal(modal) {
+        modal.style.display = 'none';
+    }
+    function setupModal(modal) {
+        var closeBtn = modal.querySelector('.close');
+        var cancelBtns = modal.querySelectorAll('.cancel-btn');
+        closeBtn.onclick = function() { closeModal(modal); };
+        cancelBtns.forEach(btn => {
+            btn.onclick = function() { closeModal(modal); };
+        });
+        window.onclick = function(event) {
+            if (event.target == modal) closeModal(modal);
+        };
+    }
+    setupModal(deleteModal);
+    setupModal(passwordModal);
+
+    // Configurar botões de exclusão
+    deleteButtons.forEach(btn => {
+        btn.addEventListener('click', function() {
+            var userId = this.getAttribute('data-user-id');
+            var username = this.getAttribute('data-username');
+            deleteUsernameSpan.textContent = username;
+            deleteForm.action = "{{ url_for('delete_user', user_id=0) }}".replace('0', userId);
+            deleteModal.style.display = 'flex';
+        });
+    });
+
+    // Configurar botões de alterar senha
+    var changePasswordBtns = document.querySelectorAll('.change-password-btn');
+    changePasswordBtns.forEach(btn => {
+        btn.addEventListener('click', function() {
+            var userId = this.getAttribute('data-user-id');
+            passwordForm.action = "{{ url_for('admin_change_password', user_id=0) }}".replace('0', userId);
+            passwordModal.style.display = 'flex';
+        });
+    });
+</script>
+{% endblock %}

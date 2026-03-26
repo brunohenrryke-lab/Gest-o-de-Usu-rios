@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>User Management System</title>
+    <link rel="icon" href="{{ url_for('static', filename='favicon.ico') }}">
+    <!-- Fontes modernas -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    {% block head %}{% endblock %}
+</head>
+<body>
+    <div class="wrapper">
+        {% if current_user.is_authenticated %}
+        <!-- Sidebar -->
+        <nav class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <h3>Menu</h3>
+                <button class="close-btn" id="closeSidebar">&times;</button>
+            </div>
+            <ul class="sidebar-nav">
+                <li><a href="{{ url_for('dashboard') }}">Dashboard</a></li>
+                <li><a href="{{ url_for('profile') }}">Meus Dados</a></li>
+                {% if current_user.is_admin %}
+                <li><a href="{{ url_for('user_list') }}">Listar Usuários</a></li>
+                {% endif %}
+                <li><a href="{{ url_for('dashboard') }}#sobre">Sobre o Projeto</a></li>
+                <li><a href="{{ url_for('logout') }}">Sair</a></li>
+            </ul>
+        </nav>
+        <div class="main-content">
+            <header>
+                <button class="menu-btn" id="openSidebar">☰</button>
+                <div class="clock" id="clock"></div>
+            </header>
+        {% else %}
+        <div class="main-content full-width">
+            <header>
+                <div class="clock" id="clock"></div>
+            </header>
+        {% endif %}
+
+            <!-- Flash messages melhoradas -->
+            <div class="flash-messages">
+                {% with messages = get_flashed_messages(with_categories=true) %}
+                    {% if messages %}
+                        {% for category, message in messages %}
+                            <div class="alert alert-{{ category }} alert-dismissible">
+                                <span class="alert-message">{{ message }}</span>
+                                <button class="alert-close" onclick="this.parentElement.style.display='none'">&times;</button>
+                            </div>
+                        {% endfor %}
+                    {% endif %}
+                {% endwith %}
+            </div>
+
+            <!-- Botão de voltar -->
+            <div class="back-button-container">
+                <button onclick="window.history.back();" class="btn-back">← Voltar</button>
+            </div>
+
+            <!-- Conteúdo principal -->
+            {% block content %}{% endblock %}
+
+        </div> <!-- fecha .main-content -->
+    </div> <!-- fecha .wrapper -->
+
+    <script src="{{ url_for('static', filename='js/clock.js') }}"></script>
+    <script>
+        // Sidebar toggle
+        const sidebar = document.getElementById('sidebar');
+        const openBtn = document.getElementById('openSidebar');
+        const closeBtn = document.getElementById('closeSidebar');
+        if (openBtn && closeBtn) {
+            openBtn.addEventListener('click', () => sidebar.classList.add('active'));
+            closeBtn.addEventListener('click', () => sidebar.classList.remove('active'));
+        }
+
+        // Auto dismiss flash messages after 5 seconds
+        setTimeout(function() {
+            var alerts = document.querySelectorAll('.alert');
+            alerts.forEach(function(alert) {
+                alert.style.opacity = '0';
+                setTimeout(function() {
+                    alert.style.display = 'none';
+                }, 500);
+            });
+        }, 5000);
+    </script>
+    {% block scripts %}{% endblock %}
+</body>
+</html>
