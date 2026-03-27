@@ -1,0 +1,123 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="about-container">
+    <h1>Sobre o Projeto</h1>
+    
+    <div class="about-section">
+        <h2>📋 Sistema de Gestão de Usuários</h2>
+        <p>Este é um sistema completo de gerenciamento de usuários desenvolvido como projeto de estudo e prática com Flask.</p>
+    </div>
+
+    <div class="about-section">
+        <h2>🛠️ Tecnologias Utilizadas</h2>
+        <ul>
+            <li><strong>Backend:</strong> Python com Flask</li>
+            <li><strong>Banco de Dados:</strong> SQLAlchemy ORM (SQLite / PostgreSQL)</li>
+            <li><strong>Autenticação:</strong> Flask-Login</li>
+            <li><strong>Formulários:</strong> Flask-WTF com CSRF protection</li>
+            <li><strong>E-mail:</strong> Flask-Mail com SMTP do Gmail (App Password)</li>
+            <li><strong>Frontend:</strong> HTML5, CSS3, JavaScript</li>
+            <li><strong>Estilo:</strong> Tema Dark Responsivo</li>
+            <li><strong>Deploy:</strong> PythonAnywhere / Render / Railway</li>
+        </ul>
+    </div>
+
+    <div class="about-section">
+        <h2>✨ Funcionalidades</h2>
+        <ul>
+            <li>Cadastro de usuários</li>
+            <li>Login com sessão persistente</li>
+            <li>Recuperação de senha com código de 6 dígitos via e-mail</li>
+            <li>Painel administrativo completo</li>
+            <li>Listagem de usuários com busca e paginação</li>
+            <li>Admins podem: excluir, alterar senha e alterar permissões de outros usuários</li>
+            <li>Interface responsiva (funciona no celular e PC)</li>
+            <li>Relógio em tempo real</li>
+            <li>CSRF protection em todos os formulários</li>
+        </ul>
+    </div>
+
+    <div class="about-section">
+        <h2>👨‍💻 Sobre o Desenvolvedor</h2>
+        <div class="developer-info">
+            <p><strong>Nome:</strong> {{ developer.name }}</p>
+            <p><strong>Área:</strong> {{ developer.area }}</p>
+            <p><strong>Sobre:</strong> {{ developer.bio }}</p>
+            {% if developer.github %}
+            <p><strong>GitHub:</strong> <a href="{{ developer.github }}" target="_blank">{{ developer.github }}</a></p>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<style>
+.about-container {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 1rem;
+}
+
+.about-container h1 {
+    text-align: center;
+    margin-bottom: 2rem;
+    background: linear-gradient(135deg, #fff, #aaa);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+}
+
+.about-section {
+    background: #111;
+    border: 1px solid #333;
+    border-radius: 12px;
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+}
+
+.about-section h2 {
+    color: #fff;
+    margin-bottom: 1rem;
+    font-size: 1.3rem;
+    border-bottom: 1px solid #333;
+    padding-bottom: 0.5rem;
+}
+
+.about-section ul {
+    list-style: none;
+    padding-left: 0;
+}
+
+.about-section li {
+    padding: 0.3rem 0;
+    padding-left: 1.2rem;
+    position: relative;
+}
+
+.about-section li:before {
+    content: "▹";
+    position: absolute;
+    left: 0;
+    color: #888;
+}
+
+.developer-info {
+    background: #0a0a0a;
+    padding: 1rem;
+    border-radius: 8px;
+    margin-top: 0.5rem;
+}
+
+.developer-info p {
+    margin: 0.5rem 0;
+}
+
+.developer-info a {
+    color: #66ccff;
+    text-decoration: none;
+}
+
+.developer-info a:hover {
+    text-decoration: underline;
+}
+</style>
+{% endblock %}

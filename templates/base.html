@@ -4,8 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
     <title>User Management System</title>
-    <link rel="icon" href="{{ url_for('static', filename='favicon.ico') }}">
-    <!-- Fontes modernas -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
@@ -14,7 +12,6 @@
 <body>
     <div class="wrapper">
         {% if current_user.is_authenticated %}
-        <!-- Sidebar -->
         <nav class="sidebar" id="sidebar">
             <div class="sidebar-header">
                 <h3>Menu</h3>
@@ -23,10 +20,8 @@
             <ul class="sidebar-nav">
                 <li><a href="{{ url_for('dashboard') }}">Dashboard</a></li>
                 <li><a href="{{ url_for('profile') }}">Meus Dados</a></li>
-                {% if current_user.is_admin %}
                 <li><a href="{{ url_for('user_list') }}">Listar Usuários</a></li>
-                {% endif %}
-                <li><a href="{{ url_for('dashboard') }}#sobre">Sobre o Projeto</a></li>
+                <li><a href="{{ url_for('about') }}">Sobre o Projeto</a></li>
                 <li><a href="{{ url_for('logout') }}">Sair</a></li>
             </ul>
         </nav>
@@ -42,7 +37,6 @@
             </header>
         {% endif %}
 
-            <!-- Flash messages melhoradas -->
             <div class="flash-messages">
                 {% with messages = get_flashed_messages(with_categories=true) %}
                     {% if messages %}
@@ -56,20 +50,19 @@
                 {% endwith %}
             </div>
 
-            <!-- Botão de voltar -->
+            {% if request.endpoint not in ['index', 'login', 'register', 'about'] %}
             <div class="back-button-container">
                 <button onclick="window.history.back();" class="btn-back">← Voltar</button>
             </div>
+            {% endif %}
 
-            <!-- Conteúdo principal -->
             {% block content %}{% endblock %}
 
-        </div> <!-- fecha .main-content -->
-    </div> <!-- fecha .wrapper -->
+        </div>
+    </div>
 
     <script src="{{ url_for('static', filename='js/clock.js') }}"></script>
     <script>
-        // Sidebar toggle
         const sidebar = document.getElementById('sidebar');
         const openBtn = document.getElementById('openSidebar');
         const closeBtn = document.getElementById('closeSidebar');
@@ -78,7 +71,6 @@
             closeBtn.addEventListener('click', () => sidebar.classList.remove('active'));
         }
 
-        // Auto dismiss flash messages after 5 seconds
         setTimeout(function() {
             var alerts = document.querySelectorAll('.alert');
             alerts.forEach(function(alert) {

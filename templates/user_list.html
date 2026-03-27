@@ -26,11 +26,12 @@
                     <td data-label="Email">{{ user.email }}</td>
                     <td data-label="Admin">{{ 'Sim' if user.is_admin else 'Não' }}</td>
                     <td data-label="Ações">
-                        {% if user.id != current_user.id %}
-                        <button class="btn danger delete-user-btn" data-user-id="{{ user.id }}" data-username="{{ user.username }}">Excluir</button>
-                        <button class="btn change-password-btn" data-user-id="{{ user.id }}">Alterar Senha</button>
+                        {% if current_user.is_admin and user.id != current_user.id %}
+                            <button class="btn danger delete-user-btn" data-user-id="{{ user.id }}" data-username="{{ user.username }}">Excluir</button>
+                            <button class="btn change-password-btn" data-user-id="{{ user.id }}">Alterar Senha</button>
+                            <button class="btn change-role-btn" data-user-id="{{ user.id }}" data-is-admin="{{ user.is_admin }}">Alterar Permissão</button>
                         {% else %}
-                        —
+                            —
                         {% endif %}
                     </td>
                 </tr>
@@ -50,13 +51,13 @@
     </div>
 </div>
 
-<!-- Modal de confirmação para exclusão -->
+<!-- Modal de exclusão -->
 <div id="deleteModal" class="modal">
     <div class="modal-content">
         <span class="close">&times;</span>
         <h3>Confirmar exclusão</h3>
         <p>Tem certeza que deseja excluir o usuário <strong id="deleteUsername"></strong>?</p>
-        <form id="deleteForm" method="POST" style="display: inline;">
+        <form id="deleteForm" method="POST">
             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
             <button type="submit" class="btn danger">Excluir</button>
             <button type="button" class="btn cancel-btn">Cancelar</button>
@@ -64,7 +65,7 @@
     </div>
 </div>
 
-<!-- Modal para alterar senha -->
+<!-- Modal alterar senha -->
 <div id="changePasswordModal" class="modal">
     <div class="modal-content">
         <span class="close">&times;</span>
@@ -85,36 +86,50 @@
     </div>
 </div>
 
+<!-- Modal alterar permissão -->
+<div id="changeRoleModal" class="modal">
+    <div class="modal-content">
+        <span class="close">&times;</span>
+        <h3>Alterar Permissão</h3>
+        <form id="changeRoleForm" method="POST">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <div class="form-group checkbox">
+                <input type="checkbox" name="is_admin" id="is_admin">
+                <label for="is_admin">Administrador</label>
+            </div>
+            <button type="submit" class="btn">Atualizar</button>
+            <button type="button" class="btn cancel-btn">Cancelar</button>
+        </form>
+    </div>
+</div>
+
 <script>
-    // Modal de exclusão
+    // Modais
     var deleteModal = document.getElementById('deleteModal');
     var deleteForm = document.getElementById('deleteForm');
     var deleteUsernameSpan = document.getElementById('deleteUsername');
     var deleteButtons = document.querySelectorAll('.delete-user-btn');
 
-    // Modal de alteração de senha
     var passwordModal = document.getElementById('changePasswordModal');
     var passwordForm = document.getElementById('changePasswordForm');
 
-    // Fechar modais (botão x e clique fora)
-    function closeModal(modal) {
-        modal.style.display = 'none';
-    }
+    var roleModal = document.getElementById('changeRoleModal');
+    var roleForm = document.getElementById('changeRoleForm');
+    var roleCheckbox = document.getElementById('is_admin');
+
+    function closeModal(modal) { modal.style.display = 'none'; }
     function setupModal(modal) {
         var closeBtn = modal.querySelector('.close');
         var cancelBtns = modal.querySelectorAll('.cancel-btn');
         closeBtn.onclick = function() { closeModal(modal); };
-        cancelBtns.forEach(btn => {
-            btn.onclick = function() { closeModal(modal); };
-        });
-        window.onclick = function(event) {
-            if (event.target == modal) closeModal(modal);
-        };
+        cancelBtns.forEach(btn => btn.onclick = function() { closeModal(modal); });
+        window.onclick = function(event) { if (event.target == modal) closeModal(modal); };
     }
     setupModal(deleteModal);
     setupModal(passwordModal);
+    setupModal(roleModal);
 
-    // Configurar botões de exclusão
+    // Excluir
     deleteButtons.forEach(btn => {
         btn.addEventListener('click', function() {
             var userId = this.getAttribute('data-user-id');
@@ -125,13 +140,23 @@
         });
     });
 
-    // Configurar botões de alterar senha
-    var changePasswordBtns = document.querySelectorAll('.change-password-btn');
-    changePasswordBtns.forEach(btn => {
+    // Alterar senha
+    document.querySelectorAll('.change-password-btn').forEach(btn => {
         btn.addEventListener('click', function() {
             var userId = this.getAttribute('data-user-id');
             passwordForm.action = "{{ url_for('admin_change_password', user_id=0) }}".replace('0', userId);
             passwordModal.style.display = 'flex';
+        });
+    });
+
+    // Alterar permissão
+    document.querySelectorAll('.change-role-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            var userId = this.getAttribute('data-user-id');
+            var isAdmin = this.getAttribute('data-is-admin') === 'True';
+            roleForm.action = "{{ url_for('admin_change_role', user_id=0) }}".replace('0', userId);
+            roleCheckbox.checked = isAdmin;
+            roleModal.style.display = 'flex';
         });
     });
 </script>

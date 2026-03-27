@@ -7,7 +7,7 @@ from config import Config
 from models import User, PasswordReset
 from forms import (LoginForm, RegistrationForm, ForgotPasswordForm,
                    ResetPasswordForm, ChangePasswordForm,
-                   AdminChangePasswordForm)
+                   AdminChangePasswordForm, AdminChangeRoleForm)
 from utils import send_reset_code, generate_reset_code
 
 def create_app():
@@ -93,7 +93,6 @@ def create_app():
             user = User.query.filter_by(email=form.email.data).first()
             if user:
                 code = generate_reset_code()
-                # NÃO passar expires_at; o default do modelo será usado (5 minutos)
                 reset = PasswordReset(email=form.email.data, code=code)
                 db.session.add(reset)
                 db.session.commit()
@@ -142,13 +141,21 @@ def create_app():
                 flash('Current password is incorrect.', 'danger')
         return render_template('profile.html', user=current_user, form=form)
 
-    @app.route('/admin/users')
+    @app.route('/about')
+    @login_required
+    def about():
+        developer = {
+            'name': 'Bruno Henrryke Marcelino de Souza',
+            'area': 'Estudante de Análise e Desenvolvimento de Sistemas',
+            'bio': 'Apaixonado por tecnologia e desenvolvimento web. Sempre buscando aprender e criar soluções que facilitem a vida das pessoas. Este projeto foi desenvolvido como parte do meu aprendizado em Flask e desenvolvimento full-stack.',
+            'github': 'https://github.com/brunohenrryke-lab',
+            'linkedin': 'https://www.linkedin.com/in/bruno-henrryke'
+        }
+        return render_template('about.html', developer=developer)
+
+    @app.route('/users')
     @login_required
     def user_list():
-        if not current_user.is_admin:
-            flash('Access denied.', 'danger')
-            return redirect(url_for('dashboard'))
-
         page = request.args.get('page', 1, type=int)
         search = request.args.get('search', '')
 
@@ -168,7 +175,7 @@ def create_app():
     def delete_user(user_id):
         if not current_user.is_admin:
             flash('Access denied.', 'danger')
-            return redirect(url_for('dashboard'))
+            return redirect(url_for('user_list'))
 
         user = User.query.get_or_404(user_id)
         if user.id == current_user.id:
@@ -185,7 +192,7 @@ def create_app():
     def admin_change_password(user_id):
         if not current_user.is_admin:
             flash('Access denied.', 'danger')
-            return redirect(url_for('dashboard'))
+            return redirect(url_for('user_list'))
 
         user = User.query.get_or_404(user_id)
         form = AdminChangePasswordForm()
@@ -195,6 +202,27 @@ def create_app():
             flash(f'Password for {user.username} has been changed.', 'success')
         else:
             flash('Invalid password.', 'danger')
+        return redirect(url_for('user_list'))
+
+    @app.route('/admin/user/<int:user_id>/change-role', methods=['POST'])
+    @login_required
+    def admin_change_role(user_id):
+        if not current_user.is_admin:
+            flash('Access denied.', 'danger')
+            return redirect(url_for('user_list'))
+
+        user = User.query.get_or_404(user_id)
+        if user.id == current_user.id:
+            flash('You cannot change your own role.', 'danger')
+            return redirect(url_for('user_list'))
+
+        form = AdminChangeRoleForm()
+        if form.validate_on_submit():
+            user.is_admin = form.is_admin.data
+            db.session.commit()
+            flash(f'Role for {user.username} has been updated.', 'success')
+        else:
+            flash('Invalid selection.', 'danger')
         return redirect(url_for('user_list'))
 
     # Error handlers
